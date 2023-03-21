@@ -1,6 +1,7 @@
 const express = require('express');
-const app = express();
+const cors = require('cors')
 const morgan = require('morgan');
+const app = express();
 app.use(express.json());
 app.use(morgan(function (tokens, req, res) {
   return [
@@ -12,6 +13,7 @@ app.use(morgan(function (tokens, req, res) {
     JSON.stringify(req.body[0])
   ].join(' ')
 }));
+app.use(cors());
 
 let data =
 [
@@ -43,8 +45,9 @@ const getInfo = () => {
   return summary + '<br>' + time.toString();
 }
 
-function getRandomInt() {
-  return Math.floor(Math.random() * 100000);
+function getNewId() {
+  const currentIds = data.map(person => person.id);
+  return Math.max(...currentIds) + 1;
 }
 
 app.get('/api/persons',(req, res) => {
@@ -78,20 +81,21 @@ app.get('/api/persons/:id', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   let newPerson = req.body;
+  console.log(newPerson);
   if (inValidName(newPerson)) {
     return res.status(400).json({
       error: inValidName(newPerson)
     })
   }
-  newPerson[0].id = getRandomInt();
+  newPerson.id = getNewId();
   data = data.concat(newPerson);
   res.json(newPerson);
 })
 
 const inValidName = (newData) => {
   const allNames = data.map(person => person.name);
-  const newName = newData[0].name;
-  const newNumber = newData[0].number;
+  const newName = newData.name;
+  const newNumber = newData.number;
   if (!newName || !newNumber) {
     return 'must provide name and number';
   } else if (allNames.includes(newName)) {
