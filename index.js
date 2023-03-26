@@ -26,7 +26,6 @@ const getInfo = (peopleCount) => {
 
 app.get('/api/persons', (req, res, next) => {
   People.find({}).then((people) => {
-    console.log(people);
     res.json(people);
   })
     .catch((error) => next(error));
